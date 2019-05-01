@@ -7,3 +7,5 @@ To use the application, run an http server in the folder with the index.html fil
 The program uses localStorage to store application data.
 
     python -m http.server
+
+![Image](demo.png)
