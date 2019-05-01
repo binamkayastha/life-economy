@@ -1,0 +1,221 @@
+<HTML>
+<head>
+  <meta charset="utf-8">
+  <!-- Compiled and minified CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <!-- Compiled and minified JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+  <script>
+  var appData
+
+  window.onload = function() {
+    updateFromStorage()
+  }
+
+  function addItem(listId, inputCoinsId, inputTextId, type) {
+    var listDiv = document.getElementById(listId)
+    var itemCoins = document.getElementById(inputCoinsId).value
+    var itemText = document.getElementById(inputTextId).value
+    var new_item = {}
+    if (type == "earn") {
+      new_item =  {
+        "type": type,
+        "value": itemCoins,
+        "text": itemText
+      }
+    }
+    if (type == "buy") {
+      new_item =  {
+        "type": type,
+        "value": -itemCoins,
+        "text": itemText
+      }
+    }
+    appData.itemList.push(new_item)
+    saveToStorage()
+    updateDivs()
+  }
+
+  function deleteItem(index) {
+    appData.itemList.splice(index, 1)
+    saveToStorage()
+    updateDivs()
+  }
+
+  function updateCoins(delta, text) {
+    console.log("UPDATE COINTS ")
+    console.log(delta)
+    console.log(text)
+    appData.totalCoins += delta
+    appData.logs.push(delta + " " + text)
+    saveToStorage()
+    updateDivs()
+  }
+
+  function saveToStorage() {
+    window.localStorage.setItem('app', JSON.stringify(appData))
+  }
+
+  function updateFromStorage() {
+        // Load values
+    appData = JSON.parse(window.localStorage.getItem('app'))
+    if (!appData) {
+        appData = {
+            "totalCoins": 0,
+            "logs": [],
+            "itemList": [],
+        }
+        saveToStorage()
+    }
+    updateDivs()
+  }
+
+  function updateDivs() {
+    console.log("Updates DIVS")
+    var data = appData
+    // set defaults
+    if (!data.totalCoins) { data.totalCoins = 0 }
+    document.getElementById('total-coins').innerHTML = data.totalCoins
+
+    if (!data.logs) { data.logs = [] }
+    document.getElementById('logs').innerHTML = data.logs
+
+    if (!data.itemList) { data.itemList = [] }
+    document.getElementById('total-coins').innerHTML = data.totalCoins
+    var earnHTML = ""
+    var buyHTML = ""
+    for (var index in data.itemList) {
+        var item = data.itemList[index]
+        if (item.type == "earn") {
+            var classes = "class='btn item earn-button left'"
+            var onclick = "onclick='updateCoins(" + item.value + ", \"" + item.text + "\")'"
+            var deleteButton = "<div class='btn right' onclick='deleteItem(" + index + ")'>X</div>"
+            earnHTML += "<div " + classes + " " + onclick + ">+" + item.value + "💰 " + item.text + "</div>" + deleteButton
+        } else if (item.type == "buy") {
+            var classes = "class='btn item buy-button left'"
+            var onclick = "onclick='updateCoins(" + item.value + ", \"" + item.text + "\")'"
+            var deleteButton = "<div class='btn right' onclick='deleteItem(" + index + ")'>X</div>"
+            buyHTML += "<div " + classes + " " + onclick + ">" + item.value + "💰 " + item.text + "</div>" + deleteButton
+        }
+    }
+    document.getElementById('earn-list').innerHTML = earnHTML
+    document.getElementById('buy-list').innerHTML = buyHTML
+  }
+    // total-coins
+    // earn-input-coins
+    // earn-input-text
+    // earn-list
+    // buy-input-coins
+    // buy-input-text
+    // buy-list
+    // logs
+
+
+  </script>
+
+  <style>
+  .content-wrapper {
+    margin: 20px
+  }
+  .title {
+    font-weight: bold;
+    background: #f5f5f5; /*grey lighten-4*/
+    padding: 10px;
+    opacity: 0.7;
+  }
+  .item {
+    font-weight: bold;
+    background: #f5f5f5;
+    border-radius: 5px;
+    color: rgba(0,0,0,0.87);
+    display: block;
+    height: auto;
+    line-height: auto;
+    margin: 2px;
+    opacity: 0.8;
+    padding-left: 5px;
+    width: calc(100% - 50px);
+  }
+  #earn-input {
+      width: 100%;
+  }
+  #buy-input {
+      width: 100%;
+  }
+  .input-box {
+    font-size: 12 !important;
+    height: 2rem !important;
+  }
+  </style>
+
+</head>
+<body>
+  <nav>
+    <div class="nav-wrapper brown darken-3">
+      <a href="#" class="brand-logo">Life Economy</a>
+      <div class="right">💰</div>
+      <div id="total-coins" class="right">0</div>
+    </div>
+  </nav>
+  <div class="content-wrapper">
+    <div class="row" style="margin-bottom: 0px; display: flex">
+      <div class="col s6" style="background-image: url('hammer.jpg'); background-size: cover;">
+        <h4 class="center title">Earn</h4>
+        <div id="earn-list" class="row">
+        </div>
+        <div id="earn-input" class="item">
+          <div class="row">
+            <div class="col s2">
+              <input id="earn-input-coins" type="text" class="input-box">
+            </div>
+            <div class="col s6">
+              <input id="earn-input-text" type="text" class="input-box">
+            </div>
+            <div class="col s4">
+             <div
+                class="btn"
+                onclick="addItem('earn-list', 'earn-input-coins', 'earn-input-text', 'earn')">
+                  submit
+              </div>
+            </div>
+          </div>
+        </div><br>
+      </div>
+      <div class="col s6" style="background-image: url('coins.jpeg'); background-size: cover;">
+        <h4 class="center title">Buy</h4>
+        <div id="buy-list" class="row">
+          <div class="btn item">+10💰</div><br>
+        </div>
+        <div id="buy-input" class="item">
+          <div class="row">
+            <div class="col s2">
+              <input id="buy-input-coins", type="text" class="input-box">
+            </div>
+            <div class="col s6">
+              <input id="buy-input-text" type="text" class="input-box">
+            </div>
+            <div class="col s4">
+             <div
+                class="btn"
+                onclick="addItem('buy-list', 'buy-input-coins', 'buy-input-text', 'buy')">
+                  submit
+              </div>
+            </div>
+          </div>
+        </div><br>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col s12" style="background-image: url('lined_paper.png')">
+        <h4 class="center title">Log</h4>
+        <div id="logs">
+        Something<br>
+        Okayt
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</HTML>
